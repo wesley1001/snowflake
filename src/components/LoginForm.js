@@ -1,30 +1,66 @@
+/**
+ * # LoginForm.js
+ * 
+ * This class utilizes the ```tcomb-form-native``` library and just
+ * sets up the options required for the 3 states of Login, namely
+ * Login, Register or Reset Password
+ *
+ */
 'use strict';
-
-import React,
-{
+/**
+ * ## Import
+ *
+ * React
+ */
+const React = require('react-native');
+const {
   PropTypes
-} from 'react-native';
+} = React;
 
-import {
-  LOGIN_STATE_REGISTER,
-  LOGIN_STATE_LOGIN,
-  LOGIN_STATE_FORGOT_PASSWORD,
-} from '../lib/constants';
+/** 
+ * States of login display
+ */
+const {
+  REGISTER,
+  LOGIN,
+  FORGOT_PASSWORD
+} = require('../lib/constants').default;
 
-import t from 'tcomb-form-native';
+/**
+ *  The fantastic little form library
+ */
+const t = require('tcomb-form-native');
 let Form = t.form.Form;
+
 var LoginForm = React.createClass({
+  /**
+   * ## LoginForm class
+   *
+   * * form: the properties to set into the UI form
+   * * value: the values to set in the input fields
+   * * onChange: function to call when user enters text
+   */
   propTypes: {
+    formType: PropTypes.string,
     form: PropTypes.object,
     value: PropTypes.object,
     onChange: PropTypes.func
   },
 
+  /**
+   * ## render
+   *
+   * setup all the fields using the props and default messages
+   * 
+   */
   render() {
+
+    let formType = this.props.formType;
+    
     let options = {
       auto: 'placeholders',
       fields: {
-
+        
       }
     };
 
@@ -65,45 +101,59 @@ var LoginForm = React.createClass({
     };
 
     let loginForm;
-    switch(this.props.form.state) {
+    switch(formType) {
+      /**
+       * ### Registration
+       * The registration form has 4 fields
+       */
+    case(REGISTER):
+      loginForm = t.struct({
+        username: t.String,
+        email: t.String,
+        password: t.String,
+        passwordAgain: t.String
+      });
+      options.fields['username'] = username;
+      options.fields['email'] = email;
+      options.fields['password'] = password;
+      options.fields['passwordAgain'] = passwordAgain;
+      break;
+
+      /**
+       * ### Login
+       * The login form has only 2 fields
+       */
+    case(LOGIN):
+      loginForm = t.struct({
+        username: t.String,
+        password: t.String
+      });
+      options.fields['username'] = username;
+      options.fields['password'] = password;
+      break;
       
-    case(LOGIN_STATE_REGISTER):
-        loginForm = t.struct({
-          username: t.String,
-          email: t.String,
-          password: t.String,
-          passwordAgain: t.String
-        });
-        options.fields['username'] = username;
-        options.fields['email'] = email;
-        options.fields['password'] = password;
-        options.fields['passwordAgain'] = passwordAgain;
-        break;
-        
-      case(LOGIN_STATE_LOGIN):
-        loginForm = t.struct({
-          username: t.String,
-          password: t.String
-        });
-        options.fields['username'] = username;
-        options.fields['password'] = password;
-        break;
-        
-      case(LOGIN_STATE_FORGOT_PASSWORD):
-        loginForm = t.struct({
-          email: t.String
-        });
-        options.fields['email'] = email;
-        break;
+      /**
+       * ### Reset password
+       * The password reset form has only 1 field
+       */
+    case(FORGOT_PASSWORD):
+      loginForm = t.struct({
+        email: t.String
+      });
+      options.fields['email'] = email;
+      break;
     } //switch
 
+    /**
+     * ### Return
+     * returns the Form component with the correct structures
+     */
     return (
-        <Form
-            ref="form"
-            type={loginForm}
-            options={options}
-            value={this.props.value}
-            onChange={this.props.onChange}
+        <Form ref="form"
+      type={loginForm}
+      options={options}
+      value={this.props.value}
+      onChange={this.props.onChange}
         />
 
     );

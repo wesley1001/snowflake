@@ -1,21 +1,51 @@
+/**
+ * # authActions-test.js
+ * 
+ * This test is for authActions
+ *
+ */
 'use strict';
 jest.autoMockOff();
 
+/**
+ * ## Mocks
+ *
+ * We don't want to use the devices storage, nor actually call Parse.com
+ */
 jest.mock('../../../lib/AppAuthToken');
-jest.mock('../../../lib/Parse');
+jest.mock('../../../lib/BackendFactory');
 
+/**
+ * ## Mock Store
+ *
+ * The ```mockStore``` confirms the all the actions are dispatched and
+ * in the correct order
+ *
+ */
 var mockStore = require('../../mocks/Store');
+
+/**
+ * ## Class under test
+ *
+ */
 var actions = require('../authActions');
 
-import {
+/**
+ * ## Imports
+ * 
+ * actions under test 
+ */
+const {
   SESSION_TOKEN_REQUEST,
   SESSION_TOKEN_SUCCESS,
   SESSION_TOKEN_FAILURE,
 
-  LOGIN_STATE_LOGOUT,
-  LOGIN_STATE_REGISTER,
-  LOGIN_STATE_LOGIN,
-  LOGIN_STATE_FORGOT_PASSWORD,
+  DELETE_TOKEN_REQUEST,
+  
+  LOGOUT,
+  REGISTER,
+  LOGIN,
+  FORGOT_PASSWORD,
 
   LOGOUT_REQUEST,
   LOGOUT_SUCCESS,
@@ -30,29 +60,34 @@ import {
   SIGNUP_SUCCESS,
   SIGNUP_FAILURE,
 
-  EMIT_LOGGED_IN,
-  EMIT_LOGGED_OUT,
-
   RESET_PASSWORD_REQUEST,
   RESET_PASSWORD_SUCCESS,
   RESET_PASSWORD_FAILURE
-} from '../../../lib/constants';
+} = require('../../../lib/constants').default;
 
+/**
+ * ## Tests
+ * 
+ * authActions
+ */
 describe('authActions', () => {
+  /**
+   * ### simple tests that prove the actions have the specific type
+   */ 
   it('should set logoutState', () => {
-    expect(actions.logoutState()).toEqual({type: LOGIN_STATE_LOGOUT });
+    expect(actions.logoutState()).toEqual({type: LOGOUT });
   });
 
   it('should set registerState', () => {
-    expect(actions.registerState()).toEqual({type: LOGIN_STATE_REGISTER });
+    expect(actions.registerState()).toEqual({type: REGISTER });
   });
 
   it('should set loginState', () => {
-    expect(actions.loginState()).toEqual({type: LOGIN_STATE_LOGIN});
+    expect(actions.loginState()).toEqual({type: LOGIN});
   });
   
   it('should set forgotPasswordState', () => {
-    expect(actions.forgotPasswordState()).toEqual({type: LOGIN_STATE_FORGOT_PASSWORD});
+    expect(actions.forgotPasswordState()).toEqual({type: FORGOT_PASSWORD});
   });
 
   it('should set logoutRequest', () => {
@@ -70,16 +105,6 @@ describe('authActions', () => {
                                                   payload: error});
 
   });
-
-  it('should set onAuthFormFieldChange', () => {
-    let field = 'field';
-    let value = 'value';
-    expect(actions.onAuthFormFieldChange(field, value)).toEqual({
-      type: ON_AUTH_FORM_FIELD_CHANGE,
-      payload: {field: field, value: value}
-    });
-  });
-
   
   it('should set signupRequest', () => {
     expect(actions.signupRequest()).toEqual({type: SIGNUP_REQUEST});
@@ -103,14 +128,6 @@ describe('authActions', () => {
     let error = {error: 'thisistheerror'};
     expect(actions.sessionTokenRequestFailure(error)).toEqual({
       type: SESSION_TOKEN_FAILURE,payload: error });
-  });
-
-  it('should set emitLoggedIn', () => {
-    expect(actions.emitLoggedIn()).toEqual({type: EMIT_LOGGED_IN});
-  });
-
-  it('should set emitLoggedOut', () => {
-    expect(actions.emitLoggedOut()).toEqual({type: EMIT_LOGGED_OUT});
   });
 
   it('should set signupFailure', () => {
@@ -150,13 +167,29 @@ describe('authActions', () => {
 
   });
 
-  pit('should logout', () => {
+  it('should set onAuthFormFieldChange', () => {
+    let field = 'field';
+    let value = 'value';
+    expect(actions.onAuthFormFieldChange(field, value)).toEqual({
+      type: ON_AUTH_FORM_FIELD_CHANGE,
+      payload: {field: field, value: value}
+    });
+  });
 
+  /**
+   * ### async tests
+   * 
+   * the following tests describe the actions that should be
+   * dispatched the function is invoked
+   *
+   * *Note*: these tests are run with ```it``` because they are async
+   *
+   */
+  it('should logout', () => {
     const expectedActions = [
       {type: LOGOUT_REQUEST},
-      {type: LOGIN_STATE_REGISTER},
+      {type: REGISTER},
       {type: LOGOUT_SUCCESS},
-      {type: EMIT_LOGGED_OUT},
       {type: SESSION_TOKEN_REQUEST},
       {type: SESSION_TOKEN_SUCCESS}
     ];
@@ -165,63 +198,53 @@ describe('authActions', () => {
     return store.dispatch(actions.logout());
   });
 
-  pit('should login', () => {
-    
+  it('should login', () => {
     const expectedActions = [
       {type: LOGIN_REQUEST},
-      {type: LOGIN_STATE_LOGOUT},
-      {type: LOGIN_SUCCESS},
-      {type: EMIT_LOGGED_IN}
+      {type: LOGOUT},
+      {type: LOGIN_SUCCESS}
     ];
-
 
     const store = mockStore({}, expectedActions);
     return store.dispatch(actions.login('foo','bar'));
   });
 
-  pit('should getSessionToken', () => {
-    
+  it('should getSessionToken', () => {
     const expectedActions = [
       {type: SESSION_TOKEN_REQUEST},      
-      {type: LOGIN_STATE_LOGOUT},
-      {type: SESSION_TOKEN_SUCCESS},
-      {type: EMIT_LOGGED_IN}
+      {type: LOGOUT},
+      {type: SESSION_TOKEN_SUCCESS}
     ];
-
 
     const store = mockStore({}, expectedActions);
     return store.dispatch(actions.getSessionToken());
   });
 
-  pit('should signup', () => {
-    
+  it('should signup', () => {
     const expectedActions = [
       {type: SIGNUP_REQUEST},      
-      {type: LOGIN_STATE_LOGOUT},
-      {type: SIGNUP_SUCCESS},
-      {type: EMIT_LOGGED_IN}
+      {type: LOGOUT},
+      {type: SIGNUP_SUCCESS}
     ];
 
     const store = mockStore({}, expectedActions);
     return store.dispatch(actions.signup('user','email','password'));
   });
 
-  pit('should resetPassword', () => {
-    
+  it('should resetPassword', () => {
     const expectedActions = [
       {type: RESET_PASSWORD_REQUEST},      
-      {type: LOGIN_STATE_LOGIN},
-      {type: RESET_PASSWORD_SUCCESS},
-      {type: EMIT_LOGGED_OUT}
+      {type: LOGIN},
+      {type: RESET_PASSWORD_SUCCESS}
     ];
 
     const store = mockStore({}, expectedActions);
     return store.dispatch(actions.resetPassword('email'));
   });
 
-  pit('should deleteSessionToken', () => {
-    
+  it('should deleteSessionToken', () => {
     const expectedActions = [
+      {type: DELETE_TOKEN_REQUEST},
       {type: SESSION_TOKEN_REQUEST},
       {type: SESSION_TOKEN_SUCCESS}      
     ];

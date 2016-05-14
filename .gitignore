@@ -31,8 +31,9 @@ local.properties
 
 # node.js
 #
-node_modules/
 npm-debug.log
-
+node_modules/
 # jest
 coverage/
+
+src/lib/config.js

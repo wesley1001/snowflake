@@ -1,14 +1,35 @@
+/**
+ * # profileActions.js
+ * 
+ * All the request actions have 3 variations, the request, a success
+ * and a failure. They all follow the pattern that the request will
+ * set the ```isFetching``` to true and the whether it's successful or
+ * fails, setting it back to false.
+ * 
+ */
 'use strict';
 
+/**
+ * ## Mocks
+ *
+ * turn mocking off but mock AppAuthToken and Parse
+ *
+ */
 jest.autoMockOff();
 
 jest.mock('../../../lib/AppAuthToken');
-jest.mock('../../../lib/Parse');
+jest.mock('../../../lib/BackendFactory');
+/**
+ * ## Store
+ * The mockStore will validate the actions are performed 
+ */
+const mockStore = require('../../mocks/Store');
+const actions = require('../profileActions');
 
-var mockStore = require('../../mocks/Store');
-var actions = require('../profileActions');
-
-import {
+/**
+ * ## Actions to test
+ */
+const {
   GET_PROFILE_REQUEST,
   GET_PROFILE_SUCCESS,
   GET_PROFILE_FAILURE,
@@ -19,9 +40,17 @@ import {
 
   ON_PROFILE_FORM_FIELD_CHANGE
 
-} from '../../../lib/constants';
+} = require('../../../lib/constants').default;
 
-describe('authActions', () => {
+/**
+ * ## Tests
+ * 
+ * profileActions
+ */
+describe('profileActions', () => {
+  /**
+   * ### simple tests that prove the actions have the specific type
+   */   
   it('should getProfileRequest', () => {
     expect(actions.getProfileRequest()).toEqual({type: GET_PROFILE_REQUEST});
   });
@@ -55,7 +84,6 @@ describe('authActions', () => {
                                                         payload:json});
   });
 
-
   it('should onProfileFormFieldChange', () => {
     let field = 'field';
     let value = 'value';
@@ -63,9 +91,16 @@ describe('authActions', () => {
       type: ON_PROFILE_FORM_FIELD_CHANGE,       payload: {field: field, value: value}});
   });
 
-
-  pit('should getProfile', () => {
-    
+  /**
+   * ### async tests
+   * 
+   * the following tests describe the actions that should be
+   * dispatched the function is invoked
+   *
+   * *Note*: these tests are run with ```pit``` because they are async
+   *
+   */
+  it('should getProfile', () => {
     const expectedActions = [
       {type: GET_PROFILE_REQUEST},
       {type: GET_PROFILE_SUCCESS}
@@ -75,14 +110,12 @@ describe('authActions', () => {
     return store.dispatch(actions.getProfile());
   });
 
-  pit('should updateProfile', () => {
-    
+  it('should updateProfile', () => {
     const expectedActions = [
       {type: PROFILE_UPDATE_REQUEST},
       {type: PROFILE_UPDATE_SUCCESS},
       {type: GET_PROFILE_REQUEST},
       {type: GET_PROFILE_SUCCESS}
-
     ];
 
     const store = mockStore({}, expectedActions);

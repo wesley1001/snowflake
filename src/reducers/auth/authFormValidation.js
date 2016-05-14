@@ -1,19 +1,40 @@
+/**
+ * # authFormValidation.js
+ * 
+ * This class determines only if the form is valid 
+ * so that the form button can be enabled.
+ * if all the fields on the form are without error,
+ * the form is considered valid
+ */
 'use strict';
 
-import {
-  LOGIN_STATE_LOGOUT,
-  LOGIN_STATE_REGISTER,
-  LOGIN_STATE_LOGIN,
-  LOGIN_STATE_FORGOT_PASSWORD,
-} from '../../lib/constants';
+/**
+ * ## Imports
+ * the actions being addressed
+ */
+const {
+  LOGOUT,
+  REGISTER,
+  LOGIN,
+  FORGOT_PASSWORD
+} = require('../../lib/constants').default;
 
+/**
+ * ## formValidation
+ * @param {Object} state - the Redux state object
+ */
 export default function formValidation (state) {
 
   switch(state.form.state) {
-  case LOGIN_STATE_LOGOUT:
+    /**
+     * ### Logout has no fields, so always valid
+     */
+  case LOGOUT:
     return state.setIn(['form','isValid'],true);
-    
-  case LOGIN_STATE_REGISTER:
+    /**
+     * ### Registration has 4 fields
+     */     
+  case REGISTER:
     if (state.form.fields.username != ''
         &&
         state.form.fields.email !== ''
@@ -33,8 +54,10 @@ export default function formValidation (state) {
     } else {
       return state.setIn(['form','isValid'],false);
     }
-
-  case LOGIN_STATE_LOGIN:
+    /**
+     * ### Login has 2 fields
+     */
+  case LOGIN:
     if (state.form.fields.username !== ''
         &&
         state.form.fields.password !== ''
@@ -46,8 +69,10 @@ export default function formValidation (state) {
     } else {
       return state.setIn(['form','isValid'],false);
     }
-    
-  case LOGIN_STATE_FORGOT_PASSWORD:
+    /**
+     * ### Reset password has 1 field
+     */     
+  case FORGOT_PASSWORD:
     if (state.form.fields.email !== ''
         &&
         !state.form.fields.emailHasError){ 
@@ -55,9 +80,10 @@ export default function formValidation (state) {
     } else {
       return state.setIn(['form','isValid'],false);
     }
-
     
   }
+  /**
+   * Default, return the state
+   */
   return state;
-
 }
